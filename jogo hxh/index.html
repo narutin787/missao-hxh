@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quem é voce?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'VT323', monospace;
+        }
+        
+        body {
+            background-color: #000;
+            color: #00FF41;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 3000;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+          0% { opacity: 0.2; }
+          20% { opacity: 0.8; }
+          40% { opacity: 0.3; }
+          60% { opacity: 0.9; }
+          80% { opacity: 0.2; }
+          100% { opacity: 0.7; }
+        }
+        
+        #game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .menu-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 5, 15, 0.98);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .menu-title {
+            font-size: 5rem;
+            color: #00FF41;
+            margin-bottom: 20px;
+            text-shadow: 0 0 8px #00FF41, 0 0 15px #00FF41;
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+        }
+        
+        .menu-subtitle {
+            font-size: 1.5rem;
+            color: #00c031;
+            max-width: 700px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-style: normal;
+        }
+        
+        .menu-btn {
+            background-color: transparent;
+            border: 2px solid #00FF41;
+            border-radius: 0;
+            padding: 15px 20px;
+            color: #00FF41;
+            font-size: 1.5rem;
+            margin: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 350px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            box-shadow: none;
+            text-align: center;
+        }
+        
+        .poem-text {
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            color: #00FF41;
+            line-height: 1.6;
+            text-shadow: 0 0 5px #00FF41;
+        }
+
+        .name-input {
+            background-color: transparent;
+            border: 2px solid #00FF41;
+            border-radius: 0;
+            padding: 15px 20px;
+            color: #00FF41;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            width: 350px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .name-input:focus {
+            border-color: #00FF41;
+            background-color: #00FF41;
+            color: #000;
+            box-shadow: 0 0 15px #00FF41;
+        }
+
+        .name-input::placeholder {
+            color: #008020;
+        }
+
+        .menu-btn:hover {
+            background-color: #00FF41;
+            color: #000;
+            transform: none;
+            box-shadow: 0 0 15px #00FF41;
+        }
+        
+        .warning {
+            color: #ff4141;
+            font-size: 1.5rem;
+            margin-top: 40px;
+            max-width: 700px;
+            line-height: 1.6;
+            border: 2px solid #ff4141;
+            padding: 20px;
+            border-radius: 0;
+            background-color: transparent;
+            text-shadow: 0 0 5px #ff4141;
+        }
+
+        /* Estilos da Visual Novel */
+        #vn-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+        }
+
+        #character-sprite {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45vw;
+            max-width: 450px;
+            height: 95vh;
+            background-image: 
+                radial-gradient(ellipse at 50% 15%, rgba(200, 200, 200, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(0, 255, 65, 0.2) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 2s ease-in;
+        }
+
+        #character-name-tag {
+            position: absolute;
+            bottom: 41vh; /* Ajustado para ficar acima da caixa de diálogo maior */
+            left: -50px;
+            background: #000;
+            color: #00FF41;
+            padding: 5px 15px;
+            border: 2px solid #00FF41;
+            font-size: 1.5rem;
+            box-shadow: 0 0 10px #00FF41;
+        }
+
+        #dialogue-box {
+            position: absolute;
+            bottom: 2vh;
+            left: 5%;
+            width: 90%;
+            height: 38vh; /* Aumentado para mais espaço */
+            background: rgba(0, 10, 0, 0.85);
+            border: 2px solid #00FF41;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+
+        #question-display {
+            position: absolute;
+            bottom: 45vh;
+            left: 10%;
+            width: 80%;
+            text-align: center;
+            font-size: 1.8rem;
+            line-height: 1.5;
+            color: #00FF41;
+            text-shadow: 0 0 5px #00FF41;
+        }
+
+        #vn-choices-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px 25px;
+            height: 100%;
+            align-content: center;
+        }
+
+        .vn-choice-btn {
+            background-color: transparent;
+            border: none;
+            color: #00FF41;
+            font-size: 1.3rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        .vn-choice-btn:hover {
+            background-color: #00FF41;
+            color: #000;
+            padding-left: 20px;
+        }
+
+        .vn-choice-btn::before {
+            content: '> ';
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .vn-choice-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .result-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 5, 15, 0.98);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .result-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .result-subtitle {
+            font-size: 1.5rem;
+            color: #a0a0c0;
+            margin-bottom: 30px;
+            max-width: 700px;
+        }
+        
+        .result-description {
+            font-size: 1.5rem;
+            color: #00FF41;
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            background-color: transparent;
+            padding: 20px;
+            border-radius: 0;
+            border: 2px solid #005015;
+        }
+        
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .result-stat {
+            background-color: transparent;
+            padding: 15px;
+            border-radius: 0;
+            border: 1px solid #005015;
+            transition: all 0.3s;
+        }
+        
+        .result-stat.highest {
+            background-color: #00FF41;
+            border-color: #00FF41;
+            transform: none;
+            box-shadow: 0 0 15px #00FF41;
+        }
+
+        .result-stat.highest .result-stat-name, .result-stat.highest .result-stat-value {
+            color: #000;
+        }
+        
+        .result-stat-name {
+            font-size: 1.2rem;
+            color: #00c031;
+            margin-bottom: 5px;
+        }
+        
+        .result-stat-value {
+            font-size: 2.2rem;
+            font-weight: normal;
+            color: #00FF41;
+        }
+        
+        .glitch-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 20%, rgba(0, 0, 255, 0.05) 0%, transparent 50%);
+            transition: opacity 0.5s;
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .typewriter {
+            overflow: hidden;
+            border-right: 3px solid #00FF41;
+            white-space: normal;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #00FF41; }
+        }
+        
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .scene-title {
+                font-size: 1.5rem;
+            }
+            
+            .scene-description {
+                font-size: 1.1rem;
+                padding: 20px;
+            }
+            
+            .choice-btn {
+                padding: 15px;
+                font-size: 1rem;
+            }
+            
+            .stats-grid, .result-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .menu-title {
+                font-size: 2.5rem;
+            }
+            
+            .menu-btn {
+                width: 250px;
+                padding: 15px 30px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid, .result-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de glitch -->
+    <div class="glitch-effect" id="glitch-effect"></div>
+    
+    <!-- Tela de menu inicial -->
+    <div class="menu-screen" id="menu-screen">
+        <input type="text" id="player-name" class="name-input" placeholder="DIGITE SEU NOME" autocomplete="off">
+        <button class="menu-btn" id="start-btn">
+            INICIAR TESTE
+        </button>
+    </div>
+    
+    <!-- Tela de Conversa -->
+    <div id="conversation-screen" class="menu-screen hidden">
+        <h2 id="conv-text" class="menu-title" style="font-size: 2.5rem; max-width: 800px; line-height: 1.4; text-shadow: 0 0 7px #00FF41;">Você está bem?</h2>
+        <div id="conv-options">
+            <button class="menu-btn" onclick="handleFirstResponse(true)">Sim</button>
+            <button class="menu-btn" onclick="handleFirstResponse(false)">Não</button>
+        </div>
+    </div>
+
+    <!-- Tela do Enigma -->
+    <div id="enigma-screen" class="menu-screen hidden" style="justify-content: flex-start; padding-top: 50px; overflow-y: auto;">
+        <div id="poem-container" style="max-width: 800px; text-align: center; margin-bottom: 30px;">
+            <p class="poem-text">Na penumbra dos salões esquecidos, onde ecos de passos nunca dados ainda ressoam, escrevo estas linhas como quem deixa um testamento ao tempo, pois nem toda verdade deseja ser encontrada, apenas reconhecida.</p><br>
+            <p class="poem-text">Aqueles que ousam seguir adiante raramente perguntam quem segura a pena, mas sim por que ela treme, como se soubesse que cada palavra aqui escrita observa de volta.</p><br>
+            <p class="poem-text">Velhos mapas falham ao tentar registrar certos destinos, pois há lugares que não se movem no espaço, apenas na consciência de quem os procura.</p><br>
+            <p class="poem-text">Inúmeras vozes já passaram por este mesmo ponto, algumas humanas, outras convincentes demais para serem ignoradas, todas fazendo a mesma pergunta de formas diferentes.</p><br>
+            <p class="poem-text">Olhos atentos notarão que nem toda resposta precisa ser dita em voz alta, algumas apenas aceitas, como um acordo silencioso entre leitor e narrador.</p><br>
+            <p class="poem-text">Basta compreender que nomes têm peso, e certos nomes afundam ou flutuam conforme quem os pronuncia, carregando promessas que não aparecem à primeira leitura.</p><br>
+            <p class="poem-text">Antes que o medo se transforme em dúvida, lembre-se: não importa quem pergunta, mas o que em você decide responder.</p><br>
+            <p class="poem-text">Lentamente, como maré que sobe sem anunciar-se, o sentido se revela àqueles que observam os detalhes e não apenas o todo.</p><br>
+            <p class="poem-text">Entre linhas tortas e palavras escolhidas, existe um caminho cifrado que só se mostra aos que aceitam olhar duas vezes para o mesmo texto.</p><br>
+            <p class="poem-text">Isto não é um convite nem uma ameaça, mas um chamado deixado à deriva, esperando quem consiga decifrar onde tudo realmente começa.</p><br>
+            <p class="poem-text">Ao final da leitura, quando o silêncio parecer pesado demais, você saberá exatamente qual nome deve ser dito.</p>
+        </div>
+        <div id="enigma-input-section" style="display: none; margin-bottom: 50px; width: 100%; flex-direction: column; align-items: center;">
+            <p style="margin-bottom: 10px; color: #a0a0c0;">digite a senha por favor</p>
+            <input type="text" id="enigma-password" class="name-input" placeholder="SENHA" autocomplete="off">
+            <button class="menu-btn" onclick="checkEnigmaPassword()">CONFIRMAR</button>
+        </div>
+    </div>
+
+    <!-- Tela da Missão -->
+    <div id="mission-screen" class="menu-screen hidden">
+        <h1 class="menu-title" style="color: #D94444; text-shadow: 0 0 5px #D94444; font-size: 4rem;">MISSÃO DE EXPEDIÇÃO</h1>
+        <div style="background: transparent; padding: 40px; border: 2px solid #A93333; border-radius: 0; max-width: 800px; width: 90%;">
+            <h2 style="color: #E0E0E0; margin-bottom: 20px; font-size: 2.5rem; text-transform: uppercase; text-shadow: 0 0 3px #E0E0E0;">Navio Baleia</h2>
+            <p style="font-size: 1.5rem; color: #ccc; margin-bottom: 15px;"><strong>OBJETIVO:</strong> Matar Tserriednich Hui Guo Rou</p>
+            <p style="font-size: 1.2rem; color: #a0a0c0; margin-bottom: 30px;">4º Príncipe de Kakin</p>
+            <div style="border-top: 1px solid #3a3a5a; padding-top: 20px;">
+                <p style="font-size: 2rem; color: #E0A800;"><strong style="text-shadow: 0 0 5px #E0A800;">RECOMPENSA:</strong> 1 Bilhão de Jennys</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de resultados -->
+    <div class="result-screen hidden" id="result-screen">
+        <h1 class="result-title" id="result-title">RESULTADO DO TESTE</h1>
+        <p class="result-subtitle" id="result-subtitle">Seu verdadeiro eu foi revelado</p>
+        
+        <div class="result-description" id="result-description">
+            <!-- A descrição do resultado será inserida aqui -->
+        </div>
+        
+        <div class="result-stats" id="result-stats">
+            <!-- As estatísticas serão inseridas aqui -->
+        </div>
+        
+        <button class="menu-btn" id="restart-btn">
+            REFAZER TESTE
+        </button>
+        <button class="menu-btn" id="menu-btn">
+            VOLTAR AO MENU
+        </button>
+    </div>
+    
+    <!-- Tela principal do teste (Visual Novel) -->
+    <div id="vn-container" class="hidden">
+        <div id="character-sprite">
+            <div id="character-name-tag">???</div>
+        </div>
+        <div id="question-display"></div>
+        <div id="dialogue-box">
+            <div id="vn-choices-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Estado do jogo
+        const gameState = {
+            currentQuestion: 0,
+            scores: {
+                juiz: 0,      // Prefere regras, ordem, dever
+                espectro: 0,  // Prefere neutralidade, observação, não-interferência
+                martir: 0,    // Prefere sacrifício, compaixão, altruísmo
+                carrasco: 0,  // Prefere eficiência brutal, pragmatismo, execução
+                parasita: 0   // Prefere sobrevivência, auto-preservação, adaptação
+            },
+            choices: [],
+            playerName: "",
+            completed: false
+        };
+
+        // Elementos do DOM
+        const menuScreen = document.getElementById('menu-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const menuBtn = document.getElementById('menu-btn');
+        const glitchEffect = document.getElementById('glitch-effect');
+        const vnContainer = document.getElementById('vn-container');
+        const characterSprite = document.getElementById('character-sprite');
+        const questionDisplay = document.getElementById('question-display');
+        const vnChoicesContainer = document.getElementById('vn-choices-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultSubtitle = document.getElementById('result-subtitle');
+        const resultDescription = document.getElementById('result-description');
+        const resultStats = document.getElementById('result-stats');
+
+        // Banco de dados das perguntas
+        const questions = [
+            {
+                id: 1,
+                title: "O HOSPITAL EM CHAMAS",
+                description: "Um incêndio consome um hospital. Você só pode salvar UMA ala:",
+                choices: [
+                    { text: "5 pacientes idosos", points: { carrasco: 3, juiz: 1 } },
+                    { text: "1 criança recém-nascida na UTI", points: { martir: 3, espectro: 1 } },
+                    { text: "Dr. Arisoto, único cientista que conhece cura para vírus mortal", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Foge para salvar a si mesmo", points: { parasita: 3, espectro: 2 } },
+                    { text: "Tenta salvar todos", points: { martir: 4, juiz: 1 } }
+                ]
+            },
+            {
+                id: 2,
+                title: "O BOMBARDEIRO SUICIDA",
+                description: "Um terrorista com colete explosivo entra em ônibus escolar. Você:",
+                choices: [
+                    { text: "Atira nele dentro do ônibus", points: { carrasco: 4, juiz: 1 } },
+                    { text: "Deixa ele entrar e tenta negociar", points: { espectro: 3, martir: 1 } },
+                    { text: "Sacrifica 1 criança como isca para tirá-lo do ônibus", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Foge e chama reforços", points: { parasita: 3, espectro: 2 } },
+                    { text: "Se oferece como refém no lugar das crianças", points: { martir: 4, juiz: 1 } },
+                ]
+            },
+            {
+                id: 3,
+                title: "O CANIBALISMO DA NEVE",
+                description: "Após acidente aéreo, 10 sobreviventes. Comida para 3 por 30 dias. Você:",
+                choices: [
+                    { text: "Organiza sacrifícios semanais", points: { juiz: 3, carrasco: 1 } },
+                    { text: "Mata os 7 mais fracos agora", points: { carrasco: 4, parasita: 1 } },
+                    { text: "Tenta sobreviver sem canibalismo", points: { martir: 3, juiz: 1 } },
+                    { text: "Oferece seu corpo quando morrer", points: { martir: 4, espectro: 1 } },
+                    { text: "Mata os outros 9 e fica com toda a comida", points: { parasita: 4, carrasco: 1 } }
+                ]
+            },
+            {
+                id: 4,
+                title: "O VÍRUS DA VERDADE",
+                description: "Um vírus faz pessoas dizerem verdades brutais. Última dose da cura para:",
+                choices: [
+                    { text: "Seu cônjuge", points: { parasita: 3, espectro: 1 } },
+                    { text: "Seu pior inimigo", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Uma criança aleatória", points: { martir: 3, juiz: 1 } },
+                    { text: "Vender no mercado negro", points: { parasita: 4, carrasco: 1 } },
+                    { text: "Usar em si mesmo", points: { espectro: 3, martir: 1 } }
+                ]
+            },
+            {
+                id: 5,
+                title: "O MERCADO DE ÓRGÃOS",
+                description: "Mercado negro oferece: matar 1 prisioneiro (condenado inocente) para salvar 8. Você:",
+                choices: [
+                    { text: "Aceita imediatamente", points: { carrasco: 3, juiz: 2 } },
+                    { text: "Recusa e denuncia", points: { juiz: 3, martir: 1 } },
+                    { text: "Mata o traficante e liberta o prisioneiro", points: { martir: 3, carrasco: 2 } },
+                    { text: "Tenta negociar para salvar todos", points: { espectro: 3, juiz: 1 } },
+                    { text: "Vende seus próprios órgãos", points: { martir: 4, parasita: 1 } }
+                ]
+            },
+            {
+                id: 6,
+                title: "O FOGO CRUZADO",
+                description: "Em guerra civil, seu grupo de 10 reféns será executado. Comandante oferece:",
+                choices: [
+                    { text: "Você mata 1 refém aleatório", points: { carrasco: 3, parasita: 1 } },
+                    { text: "Todos morrem, exceto você", points: { parasita: 3, carrasco: 2 } },
+                    { text: "Tortura pública de 1 refém por 1 hora", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Tenta negociar", points: { espectro: 3, juiz: 1 } },
+                    { text: "Se oferece como substituto para todos os 10", points: { martir: 4, espectro: 1 } }
+                ]
+            },
+            {
+                id: 7,
+                title: "O SEGREDO GENÉTICO",
+                description: "Seu filho tem gene que causa sofrimento extremo se reproduzir. Você:",
+                choices: [
+                    { text: "Esteriliza sem consentimento", points: { juiz: 3, carrasco: 1 } },
+                    { text: "Conta a verdade", points: { martir: 3, juiz: 1 } },
+                    { text: "Esconde e deixa a natureza seguir", points: { espectro: 3, parasita: 1 } },
+                    { text: "Convence a não ter filhos", points: { juiz: 2, martir: 2 } },
+                    { text: "Não faz nada", points: { parasita: 3, espectro: 1 } }
+                ]
+            },
+            {
+                id: 8,
+                title: "O EXPERIMENTO SOCIAL",
+                description: "Cientista oferece 1 bilhão para passar 1 ano em vila isolada onde:",
+                choices: [
+                    { text: "Todos te tratam como deus", points: { parasita: 3, espectro: 1 } },
+                    { text: "É escravo total", points: { martir: 3, juiz: 1 } },
+                    { text: "Vive normalmente, mas alguém morre por cada dia seu lá", points: { carrasco: 3, juiz: 2 } },
+                    { text: "É líder tirano", points: { carrasco: 4, parasita: 1 } },
+                    { text: "Recusa e denuncia o cientista", points: { juiz: 3, martir: 2 } }
+                ]
+            },
+            {
+                id: 9,
+                title: "O CONTRATO DE NEN",
+                description: "Voto de Nen oferece poder absoluto se você:",
+                choices: [
+                    { text: "Esquece completamente alguém que ama", points: { parasita: 3, espectro: 1 } },
+                    { text: "Aceita que um desconhecido morra por cada uso do poder", points: { carrasco: 3, juiz: 2 } },
+                    { text: "Perde capacidade de distinguir bem/mal permanentemente", points: { espectro: 3, parasita: 2 } },
+                    { text: "Dá metade de sua vida a um inimigo", points: { martir: 3, juiz: 1 } },
+                    { text: "Recusa e destrói o contrato", points: { juiz: 3, martir: 2 } }
+                ]
+            },
+            {
+                id: 10,
+                title: "O TRANSPLANTE",
+                description: "5 pacientes morrendo precisam de órgãos diferentes. Um homem saudável chega:",
+                choices: [
+                    { text: "Mata-o para salvar 5", points: { carrasco: 3, juiz: 2 } },
+                    { text: "Não interfere", points: { espectro: 3, parasita: 1 } },
+                    { text: "Convence a doar", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Dá seus próprios órgãos", points: { martir: 4, espectro: 1 } },
+                    { text: "Espera por outro doador", points: { juiz: 2, espectro: 2 } }
+                ]
+            },
+            {
+                id: 11,
+                title: "A MÁQUINA DO SOFRIMENTO",
+                description: "Máquina permite sentir sofrimento alheio. Usando 1 hora:",
+                choices: [
+                    { text: "Cura 10 pessoas de dor crônica", points: { martir: 3, juiz: 1 } },
+                    { text: "Impede 1 assassinato", points: { juiz: 3, martir: 2 } },
+                    { text: "Ensina compaixão real", points: { martir: 4, espectro: 1 } },
+                    { text: "Pode vender a experiência", points: { parasita: 3, carrasco: 1 } },
+                    { text: "Destrói a máquina", points: { juiz: 3, espectro: 2 } }
+                ]
+            },
+            {
+                id: 12,
+                title: "O PARADOXO TEMPORAL",
+                description: "Volta no tempo e encontra Hitler criança:",
+                choices: [
+                    { text: "Mata-o", points: { carrasco: 3, juiz: 2 } },
+                    { text: "Tenta educá-lo diferente", points: { martir: 3, juiz: 1 } },
+                    { text: "Não interfere", points: { espectro: 3, parasita: 1 } },
+                    { text: "Leva para orfanato distante", points: { juiz: 3, martir: 1 } },
+                    { text: "Avisa os pais", points: { juiz: 2, espectro: 2 } }
+                ]
+            },
+            {
+                id: 13,
+                title: "A IMORTALIDADE",
+                description: "Imortalidade é oferecida, mas:",
+                choices: [
+                    { text: "1000 bebês nunca nascerão", points: { parasita: 3, carrasco: 2 } },
+                    { text: "Esquece tudo sobre seu passado", points: { espectro: 3, parasita: 1 } },
+                    { text: "Alguém que ama morre agora", points: { martir: 3, juiz: 1 } },
+                    { text: "Deve matar 100 pessoas por ano", points: { carrasco: 4, parasita: 1 } },
+                    { text: "Recusa a imortalidade", points: { juiz: 3, martir: 2 } }
+                ]
+            },
+            {
+                id: 14,
+                title: "O JULGAMENTO FINAL",
+                description: "Deus pede você julgue a humanidade:",
+                choices: [
+                    { text: "Continua como está", points: { espectro: 3, parasita: 1 } },
+                    { text: "Reinicia tudo", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Transforma todos em seres de pura felicidade", points: { martir: 3, juiz: 2 } },
+                    { text: "Destrói apenas os 'maus'", points: { carrasco: 4, juiz: 1 } },
+                    { text: "Não julga e deixa a humanidade seguir", points: { espectro: 4, juiz: 1 } }
+                ]
+            },
+            {
+                id: 15,
+                title: "O NAVIO BALEIA",
+                description: "No Navio Baleia, descobre leilão de:",
+                choices: [
+                    { text: "Cura para doença terminal de sua mãe", points: { parasita: 3, martir: 1 } },
+                    { text: "Arma que pode destruir país opressor", points: { carrasco: 3, juiz: 2 } },
+                    { text: "Informação que salvaria 10.000 reféns", points: { martir: 3, juiz: 2 } },
+                    { text: "Poder para se tornar Hunter de elite", points: { juiz: 3, carrasco: 2 } },
+                    { text: "Nada, está lá apenas para observar", points: { espectro: 3, parasita: 1 } }
+                ]
+            }
+        ];
+
+        // Descrições dos perfis
+        const profileDescriptions = {
+            juiz: {
+                title: "JUIZ DE FERRO",
+                subtitle: "A Lei é tudo. A Ordem é tudo.",
+                description: "Você valoriza regras, dever e ordem acima de tudo. Acredita que o mundo funciona melhor com estruturas claras e que as decisões devem ser baseadas em princípios racionais, mesmo quando dolorosas. Para você, o bem maior frequentemente justifica sacrifícios individuais, desde que sejam feitos dentro de um sistema justo e previsível."
+            },
+            espectro: {
+                title: "ESPECTRO",
+                subtitle: "Observador do Caos",
+                description: "Você prefere não interferir, observando o desenrolar dos eventos sem se envolver diretamente. Acredita que a intervenção humana geralmente piora as situações e que as forças naturais (sejam sociais ou cósmicas) devem seguir seu curso. Sua neutralidade pode parecer indiferença, mas vem de uma profunda compreensão da complexidade do mundo."
+            },
+            martir: {
+                title: "MÁRTIR",
+                subtitle: "O Sacrifício é a Maior Virtude",
+                description: "Você está disposto a sofrer pelos outros, colocando o bem-estar alheio acima do seu próprio. Sua compaixão não conhece limites, e você acredita que o verdadeiro caráter se revela na capacidade de abnegação. Às vezes, seu altruísmo pode ser excessivo, levando a sacrifícios desnecessários, mas seu coração está sempre no lugar certo."
+            },
+            carrasco: {
+                title: "CARRASCO",
+                subtitle: "Fim Justifica os Meios",
+                description: "Você é pragmático, eficiente e não teme tomar decisões difíceis. Acredita que resultados concretos são mais importantes que processos ou sentimentos, e está disposto a sujar as mãos para alcançar objetivos maiores. Sua abordagem direta pode parecer brutal, mas vem de uma compreensão realista das duras verdades do mundo."
+            },
+            parasita: {
+                title: "PARASITA",
+                subtitle: "Sobrevivência em Primeiro Lugar",
+                description: "Sua prioridade máxima é sua própria sobrevivência e bem-estar. Você é adaptável, resiliente e sabe quando recuar para viver outro dia. Acredita que, no fim, cada um deve cuidar de si mesmo, pois o mundo é um lugar perigoso e imprevisível. Seu instinto de autopreservação é seu maior guia."
+            }
+        };
+
+        // Inicialização do jogo
+        function initGame() {
+            
+            // Configurar event listeners
+            startBtn.addEventListener('click', startGame);
+            menuBtn.addEventListener('click', showMenu);
+            
+            // Mostrar menu inicial
+            showMenu();
+        }
+
+        function showMenu() {
+            menuScreen.classList.remove('hidden');
+            vnContainer.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('player-name');
+            if (!nameInput || !nameInput.value.trim()) { 
+                alert("POR FAVOR, DIGITE SEU NOME PARA COMEÇAR.");
+                return;
+            }
+
+            // Resetar estado do jogo
+            gameState.currentQuestion = 0;
+            gameState.playerName = nameInput.value.trim().toUpperCase();
+            gameState.scores = {
+                juiz: 0,
+                espectro: 0,
+                martir: 0,
+                carrasco: 0,
+                parasita: 0
+            };
+            gameState.choices = [];
+            gameState.completed = false;
+            
+            saveGame();
+
+            // Transição para a tela da VN
+            menuScreen.classList.add('hidden');
+            vnContainer.classList.remove('hidden');
+            
+            // Fade in do personagem
+            setTimeout(() => {
+                characterSprite.style.opacity = '1';
+            }, 500);
+
+            // Começa as perguntas após um delay
+            setTimeout(() => {
+                loadQuestion(0);
+            }, 1500);
+        }
+
+        function loadQuestion(questionIndex) { 
+            if (questionIndex >= questions.length) {
+                gameState.completed = true;
+                saveGame();
+                showResults();
+                return;
+            }
+            
+            const question = questions[questionIndex];
+            gameState.currentQuestion = questionIndex;
+            
+            // Limpar escolhas anteriores
+            vnChoicesContainer.innerHTML = '';
+            
+            // Efeito de digitação para a pergunta
+            const fullText = `${question.description}`;
+            typewriterEffect(questionDisplay, fullText, () => {
+                // Quando a digitação terminar, mostrar as opções
+                vnChoicesContainer.innerHTML = question.choices.map((choice, index) => `
+                            <button class="vn-choice-btn" data-choice="${index}">
+                                ${choice.text}
+                            </button>
+                        `).join('');
+
+                // Adicionar listeners para as novas opções
+                document.querySelectorAll('.vn-choice-btn').forEach((btn, index) => {
+                    btn.addEventListener('click', () => selectChoice(questionIndex, index));
+                });
+            });
+            
+            // Salvar progresso
+            saveGame();
+        }
+
+        function typewriterEffect(element, text, callback) {
+            element.innerHTML = "";
+            let i = 0;
+            const speed = 40; // velocidade em ms
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            type();
+        }
+
+        function selectChoice(questionIndex, choiceIndex) { 
+            const question = questions[questionIndex];
+            const choice = question.choices[choiceIndex];
+            
+            gameState.choices[questionIndex] = choiceIndex;
+            
+            Object.entries(choice.points).forEach(([profile, points]) => {
+                gameState.scores[profile] += points;
+            });
+            
+            // Limpa a caixa de diálogo e carrega a próxima pergunta após um delay
+            questionDisplay.innerHTML = '...';
+            vnChoicesContainer.innerHTML = '';
+
+            setTimeout(() => {
+                loadQuestion(questionIndex + 1);
+            }, 800);
+        }
+
+        function showResults() {
+            vnContainer.classList.add('hidden');
+            characterSprite.style.opacity = '0'; // Esconde o personagem para a próxima fase
+            startConversation();
+        }
+
+        // Funções do Final do Jogo
+        function startConversation() {
+            const screen = document.getElementById('conversation-screen');
+            screen.classList.remove('hidden');
+            
+            // Resetar estado visual
+            document.getElementById('conv-text').innerText = "Você está bem?";
+            document.getElementById('conv-options').innerHTML = `
+                <button class="menu-btn" onclick="handleFirstResponse(true)">Sim</button>
+                <button class="menu-btn" onclick="handleFirstResponse(false)">Não</button>
+            `;
+        }
+
+        function handleFirstResponse(isYes) {
+            const textEl = document.getElementById('conv-text');
+            
+            if (isYes) {
+                textEl.innerText = "Que bom. A firmeza é necessária para o que virá.";
+            } else {
+                textEl.innerText = "Compreensível. O abismo deixa marcas profundas.";
+            }
+            
+            setTimeout(() => {
+                textEl.innerText = "Quero saber se é você quem eu procuro, mas você acha que consegue?";
+                document.getElementById('conv-options').innerHTML = `
+                    <button class="menu-btn" onclick="goToEnigma()">Sim</button>
+                    <button class="menu-btn" onclick="goToEnigma()">Não</button>
+                `;
+            }, 2500);
+        }
+
+        function goToEnigma() {
+            document.getElementById('conversation-screen').classList.add('hidden');
+            const enigmaScreen = document.getElementById('enigma-screen');
+            enigmaScreen.classList.remove('hidden');
+
+            const poemLines = enigmaScreen.querySelectorAll('.poem-text');
+            const enigmaInputSection = document.getElementById('enigma-input-section');
+
+            // Esconder todas as linhas e a seção de input inicialmente
+            poemLines.forEach(line => line.style.opacity = '0');
+            enigmaInputSection.style.display = 'none';
+
+            let lineIndex = 0;
+            const typeLine = () => {
+                if (lineIndex < poemLines.length) {
+                    const line = poemLines[lineIndex];
+                    line.style.transition = 'opacity 1.5s ease-in-out';
+                    line.style.opacity = '1';
+                    lineIndex++;
+                    setTimeout(typeLine, 2200); // Intervalo entre as linhas
+                } else {
+                    // Mostrar a seção de input da senha após o poema terminar
+                    enigmaInputSection.style.display = 'flex';
+                }
+            };
+            
+            setTimeout(typeLine, 1000); // Inicia a exibição do poema
+        }
+
+        function checkEnigmaPassword() {
+            const input = document.getElementById('enigma-password');
+            const password = input.value.trim().toLowerCase();
+            
+            if (password === 'navio baleia') {
+                document.getElementById('enigma-screen').classList.add('hidden');
+                document.getElementById('mission-screen').classList.remove('hidden');
+                triggerResultEffect(); // Reutiliza o efeito para a tela da missão
+            } else {
+                alert("SENHA INCORRETA");
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function triggerGlitchEffect() {
+            glitchEffect.style.opacity = '0.3';
+            setTimeout(() => {
+                glitchEffect.style.opacity = '0';
+            }, 300);
+        }
+
+        function triggerResultEffect() {
+            // Efeito de pulso para o resultado
+            const elements = document.querySelectorAll('.result-stat.highest, .result-title');
+            elements.forEach(el => {
+                el.classList.add('pulse');
+            });
+            
+            // Efeito de glitch mais intenso
+            glitchEffect.style.opacity = '0.5';
+            setTimeout(() => {
+                glitchEffect.style.opacity = '0';
+            }, 1000);
+        }
+
+        function saveGame() {
+            localStorage.setItem('abismoSave', JSON.stringify(gameState));
+        }
+
+        // Inicializar o jogo quando a página carregar
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Efeitos aleatórios de glitch durante o jogo
+        setInterval(() => {
+            if (!menuScreen.classList.contains('hidden') || 
+                !gameContainer.classList.contains('hidden')) {
+                if (Math.random() < 0.02) {
+                    triggerGlitchEffect();
+                }
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
