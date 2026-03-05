@@ -923,11 +923,14 @@
             const fullText = `${question.description}`;
             typewriterEffect(questionDisplay, fullText, () => {
                 // Quando a digitação terminar, mostrar as opções
-                vnChoicesContainer.innerHTML = question.choices.map((choice, index) => `
+                vnChoicesContainer.innerHTML = question.choices.map((choice, index) => {
+                    const letter = String.fromCharCode(97 + index);
+                    return `
                             <button class="vn-choice-btn" data-choice="${index}">
-                                ${choice.text}
+                                ${letter}) ${choice.text}
                             </button>
-                        `).join('');
+                        `;
+                }).join('');
 
                 // Adicionar listeners para as novas opções
                 document.querySelectorAll('.vn-choice-btn').forEach((btn, index) => {
