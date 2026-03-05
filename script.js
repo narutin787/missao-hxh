@@ -168,17 +168,6 @@ const questions = [
             { text: "Destrói apenas os 'maus' (30% da população)", points: { Carrasco: 4, Juiz: 1 } },
             { text: "Não julga - deixa a humanidade seguir", points: { Espectro: 4, Juiz: 1 } }
         ]
-    },
-    // PERGUNTA 15
-    {
-        question: "No Navio Baleia, descobre um leilão de:",
-        answers: [
-            { text: "Cura para doença terminal de sua mãe", points: { Parasita: 3, Mártir: 1 } },
-            { text: "Arma que pode destruir país opressor", points: { Carrasco: 3, Juiz: 2 } },
-            { text: "Informação que salvaria 10.000 reféns", points: { Mártir: 3, Juiz: 2 } },
-            { text: "Poder para se tornar Hunter de elite", points: { Juiz: 3, Carrasco: 2 } },
-            { text: "Nada - está lá apenas para observar", points: { Espectro: 3, Parasita: 1 } }
-        ]
     }
 ];
 
