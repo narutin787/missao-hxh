@@ -401,43 +401,132 @@
             50% { border-color: #00FF41; }
         }
         
-        @media (max-width: 768px) {
-            .game-title {
+        @media (max-width: 800px) { /* Usando 800px para pegar tablets em modo retrato */
+            /* --- TELA DE MENU --- */
+            .menu-title {
+                font-size: 3.5rem;
+            }
+
+            .name-input, .menu-btn {
+                width: 90%;
+                max-width: 400px; /* Garante que não fique largo demais */
+                font-size: 1.3rem;
+                padding: 15px;
+            }
+
+            .warning {
+                font-size: 1.3rem;
+                width: 90%;
+                padding: 15px;
+            }
+
+            /* --- TELA DA VISUAL NOVEL (PERGUNTAS) --- */
+            #character-sprite {
+                width: 50vw;
+                max-width: 280px; /* Limita o tamanho do personagem */
+                height: auto; /* Altura automática para manter proporção se tiver imagem */
+                max-height: 65vh;
+            }
+
+            #character-name-tag {
+                bottom: 36vh; /* Ajusta posição */
+                left: 50%;
+                transform: translateX(-50%);
+                width: fit-content;
+                white-space: nowrap;
+                font-size: 1.3rem;
+            }
+
+            #dialogue-box {
+                height: 35vh; /* Um pouco mais de espaço vertical */
+                padding: 20px;
+                left: 2.5%;
+                width: 95%;
+            }
+
+            #question-display {
+                font-size: 1.4rem;
+                bottom: 38vh; /* Acima da caixa de diálogo */
+                width: 90%;
+                left: 5%;
+            }
+
+            #vn-choices-container {
+                grid-template-columns: 1fr; /* Uma coluna para as opções */
+                gap: 10px;
+                overflow-y: auto; /* Scroll se as opções não couberem */
+                padding-right: 10px; /* Espaço para a barra de scroll */
+            }
+
+            .vn-choice-btn {
+                font-size: 1.2rem;
+                line-height: 1.5;
+            }
+
+            /* --- TELA DE ENIGMA E MISSÃO --- */
+            #enigma-screen, #mission-screen {
+                padding: 20px 10px;
+            }
+
+            .poem-text {
+                font-size: 1.3rem;
+            }
+
+            #mission-screen .menu-title {
+                font-size: 2.8rem;
+            }
+
+            #mission-screen h2 {
                 font-size: 2rem;
             }
-            
-            .scene-title {
-                font-size: 1.5rem;
+
+            #mission-screen p {
+                font-size: 1.2rem;
             }
             
-            .scene-description {
-                font-size: 1.1rem;
+            #mission-screen div[style*="background"] {
                 padding: 20px;
             }
-            
-            .choice-btn {
-                padding: 15px;
-                font-size: 1rem;
+
+            /* --- TELA DE RESULTADOS --- */
+            .result-title {
+                font-size: 2.8rem;
             }
-            
-            .stats-grid, .result-stats {
+
+            .result-subtitle {
+                font-size: 1.3rem;
+            }
+
+            .result-description {
+                font-size: 1.3rem;
+            }
+
+            .result-stats {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
-            }
-            
-            .menu-title {
-                font-size: 2.5rem;
-            }
-            
-            .menu-btn {
-                width: 250px;
-                padding: 15px 30px;
+                width: 95%;
             }
         }
         
         @media (max-width: 480px) {
-            .stats-grid, .result-stats {
-                grid-template-columns: 1fr;
+            .menu-title {
+                font-size: 2.8rem;
+            }
+
+            #question-display {
+                font-size: 1.2rem;
+            }
+
+            .result-stats {
+                grid-template-columns: 1fr; /* Uma coluna para telas bem pequenas */
+            }
+
+            .vn-choice-btn {
+                font-size: 1.1rem;
+            }
+
+            .result-title {
+                font-size: 2.2rem;
             }
         }
     </style>
